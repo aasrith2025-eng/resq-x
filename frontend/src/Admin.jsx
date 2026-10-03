@@ -49,6 +49,52 @@ function Admin() {
     (incident) => incident.severity === "CRITICAL"
   );
 
+  const resolvedWithTime = resolvedIncidents.filter(
+    (incident) =>
+      typeof incident.responseTimeSeconds === "number"
+  );
+
+  const totalResponseTime = resolvedWithTime.reduce(
+    (total, incident) =>
+      total + incident.responseTimeSeconds,
+    0
+  );
+
+  const averageResponseTime =
+    resolvedWithTime.length > 0
+      ? Math.round(
+          totalResponseTime / resolvedWithTime.length
+        )
+      : 0;
+
+  const fastestResponse =
+    resolvedWithTime.length > 0
+      ? Math.min(
+          ...resolvedWithTime.map(
+            (incident) =>
+              incident.responseTimeSeconds
+          )
+        )
+      : 0;
+
+  const formatDuration = (seconds) => {
+    if (
+      seconds === null ||
+      seconds === undefined
+    ) {
+      return "—";
+    }
+
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    if (minutes === 0) {
+      return `${remainingSeconds}s`;
+    }
+
+    return `${minutes}m ${remainingSeconds}s`;
+  };
+
   const getSeverityClass = (severity) => {
     if (severity === "CRITICAL") return "critical";
     if (severity === "HIGH") return "high";
@@ -77,13 +123,12 @@ function Admin() {
     <div className="admin-page">
 
       <header className="admin-header">
-
         <div>
           <div className="admin-logo">
             RESQ-X
           </div>
 
-          <p>
+          <p className="admin-subtitle">
             EMERGENCY COMMAND CENTER
           </p>
         </div>
@@ -92,87 +137,294 @@ function Admin() {
           <span></span>
           LIVE NETWORK
         </div>
-
       </header>
 
       <main className="admin-main">
 
-        <section className="admin-hero">
+        {/* ================================
+            COMMAND CENTER
+        ================================= */}
 
+        <section className="admin-title-row">
           <div>
-            <small>
-              HYPERLOCAL EMERGENCY RESPONSE
-            </small>
+            <small>HYPERLOCAL EMERGENCY RESPONSE</small>
 
             <h1>
-              Command
-              <span> Center</span>
+              Command <span>Center</span>
             </h1>
-
-            <p>
-              Monitor incidents, coordinate responders,
-              and track emergency resolution in real time.
-            </p>
           </div>
 
-          <div className="command-status">
-            <span></span>
-            SYSTEM OPERATIONAL
+          <div className="admin-refresh">
+            ● SYSTEM OPERATIONAL
           </div>
-
         </section>
+
+        {/* ================================
+            MAIN STATS
+        ================================= */}
 
         <section className="admin-stats">
 
-          <div className="stat-card">
-            <div className="stat-icon">🚨</div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-icon">🚨</div>
 
-            <div>
-              <small>ACTIVE INCIDENTS</small>
-              <strong>{activeIncidents.length}</strong>
-            </div>
+            <small>ACTIVE INCIDENTS</small>
+
+            <strong>
+              {activeIncidents.length}
+            </strong>
           </div>
 
-          <div className="stat-card critical-stat">
-            <div className="stat-icon">⚠️</div>
+          <div className="admin-stat-card stat-danger">
+            <div className="admin-stat-icon">⚠️</div>
 
-            <div>
-              <small>CRITICAL</small>
-              <strong>{criticalIncidents.length}</strong>
-            </div>
+            <small>CRITICAL</small>
+
+            <strong>
+              {criticalIncidents.length}
+            </strong>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">🚑</div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-icon">🚑</div>
 
-            <div>
-              <small>RESPONDERS</small>
-              <strong>{responders.length}</strong>
-            </div>
+            <small>RESPONDERS</small>
+
+            <strong>
+              {responders.length}
+            </strong>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">✓</div>
+          <div className="admin-stat-card stat-success">
+            <div className="admin-stat-icon">✓</div>
 
-            <div>
-              <small>RESOLVED</small>
-              <strong>{resolvedIncidents.length}</strong>
-            </div>
+            <small>RESOLVED</small>
+
+            <strong>
+              {resolvedIncidents.length}
+            </strong>
           </div>
 
         </section>
 
-        <section className="admin-section-header">
+        {/* ================================
+            RESPONSE TIME INTELLIGENCE
+        ================================= */}
 
-          <div>
-            <small>REAL-TIME MONITORING</small>
+        <section
+          className="response-analytics"
+          style={{
+            display: "block",
+            visibility: "visible",
+            opacity: 1,
+          }}
+        >
 
-            <h2>
-              Active Emergency Incidents
-            </h2>
+          <div className="analytics-header">
+
+            <div>
+              <small>
+                PERFORMANCE ANALYTICS
+              </small>
+
+              <h2>
+                Response Time <span>Intelligence</span>
+              </h2>
+
+              <p
+                style={{
+                  marginTop: "8px",
+                  color: "#8b95a5",
+                  fontSize: "12px",
+                }}
+              >
+                Measuring how quickly RESQ-X responds
+                to emergency incidents.
+              </p>
+            </div>
+
+            <div className="analytics-live">
+              ● LIVE METRICS
+            </div>
+
           </div>
 
-          <div className="refresh-status">
+          <div className="analytics-grid">
+
+            <div className="analytics-card">
+
+              <div className="analytics-icon">
+                ⏱️
+              </div>
+
+              <div>
+                <small>
+                  AVERAGE RESPONSE TIME
+                </small>
+
+                <strong>
+                  {formatDuration(
+                    averageResponseTime
+                  )}
+                </strong>
+
+                <p>
+                  Across resolved incidents
+                </p>
+              </div>
+
+            </div>
+
+            <div className="analytics-card">
+
+              <div className="analytics-icon">
+                ⚡
+              </div>
+
+              <div>
+                <small>
+                  FASTEST RESPONSE
+                </small>
+
+                <strong>
+                  {formatDuration(
+                    fastestResponse
+                  )}
+                </strong>
+
+                <p>
+                  Best recorded response
+                </p>
+              </div>
+
+            </div>
+
+            <div className="analytics-card">
+
+              <div className="analytics-icon">
+                📊
+              </div>
+
+              <div>
+                <small>
+                  INCIDENTS MEASURED
+                </small>
+
+                <strong>
+                  {resolvedWithTime.length}
+                </strong>
+
+                <p>
+                  With complete timestamps
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* RESPONSE HISTORY */}
+
+          {resolvedWithTime.length > 0 && (
+            <div className="response-history">
+
+              <div className="history-title">
+
+                <div>
+                  <small>
+                    RESPONSE HISTORY
+                  </small>
+
+                  <h3>
+                    Recently Resolved Incidents
+                  </h3>
+                </div>
+
+                <span>
+                  {resolvedWithTime.length} TRACKED
+                </span>
+
+              </div>
+
+              <div className="history-list">
+
+                {resolvedWithTime
+                  .slice(0, 5)
+                  .map((incident) => (
+
+                    <div
+                      className="history-row"
+                      key={incident.id}
+                    >
+
+                      <div className="history-incident">
+
+                        <span className="history-icon">
+                          {getIncidentIcon(
+                            incident.incidentType
+                          )}
+                        </span>
+
+                        <div>
+                          <strong>
+                            {incident.incidentType}
+                          </strong>
+
+                          <small>
+                            {incident.id}
+                          </small>
+                        </div>
+
+                      </div>
+
+                      <div className="history-status">
+                        <span>
+                          ✓ RESOLVED
+                        </span>
+                      </div>
+
+                      <div className="history-time">
+
+                        <small>
+                          RESPONSE TIME
+                        </small>
+
+                        <strong>
+                          {formatDuration(
+                            incident.responseTimeSeconds
+                          )}
+                        </strong>
+
+                      </div>
+
+                    </div>
+
+                  ))}
+
+              </div>
+
+            </div>
+          )}
+
+        </section>
+
+        {/* ================================
+            ACTIVE INCIDENTS
+        ================================= */}
+
+        <section className="admin-title-row">
+
+          <div>
+            <small>
+              REAL-TIME MONITORING
+            </small>
+
+            <h1>
+              Active Emergency Incidents
+            </h1>
+          </div>
+
+          <div className="admin-refresh">
             ● AUTO REFRESH 3 SEC
           </div>
 
@@ -181,192 +433,112 @@ function Admin() {
         {activeIncidents.length === 0 ? (
 
           <div className="admin-empty">
-            <div>🛡️</div>
 
-            <h2>
+            <div className="admin-empty-icon">
+              🛡️
+            </div>
+
+            <h3>
               No active emergencies
-            </h2>
+            </h3>
 
             <p>
-              RESQ-X is monitoring the local emergency network.
+              RESQ-X is monitoring the local emergency
+              network.
             </p>
+
           </div>
 
         ) : (
 
-          <section className="admin-incidents">
+          <section className="admin-incident-list">
 
             {activeIncidents.map((incident) => (
 
               <article
-                className={`admin-incident ${
-                  incident.severity === "CRITICAL"
-                    ? "admin-critical"
-                    : ""
-                }`}
+                className="admin-incident"
                 key={incident.id}
               >
 
-                <div className="admin-incident-header">
+                <div className="admin-incident-top">
 
-                  <div>
+                  <div className="admin-incident-left">
 
                     <span
-                      className={`severity-badge ${getSeverityClass(
-                        incident.severity
-                      )}`}
+                      className={`admin-badge ${
+                        incident.severity === "CRITICAL"
+                          ? "admin-badge-critical"
+                          : incident.severity === "HIGH"
+                          ? "admin-badge-high"
+                          : "admin-badge-medium"
+                      }`}
                     >
                       {incident.severity}
                     </span>
 
-                    <span className="incident-id-badge">
+                    <span className="admin-incident-id">
                       {incident.id}
                     </span>
 
                   </div>
 
-                  <span className="admin-incident-status">
+                  <span className="admin-status">
                     {incident.status}
                   </span>
 
                 </div>
 
-                <div className="admin-incident-body">
+                <h3>
+                  {getIncidentIcon(
+                    incident.incidentType
+                  )}{" "}
+                  {incident.incidentType}
+                </h3>
 
-                  <div className="admin-incident-icon">
-                    {getIncidentIcon(incident.incidentType)}
-                  </div>
+                <p>
+                  {incident.description}
+                </p>
 
-                  <div className="admin-incident-details">
+                <div className="admin-incident-meta">
 
-                    <h3>
-                      {incident.incidentType}
-                    </h3>
+                  <span>
+                    📍{" "}
+                    {incident.latitude
+                      ? `${Number(
+                          incident.latitude
+                        ).toFixed(5)}, ${Number(
+                          incident.longitude
+                        ).toFixed(5)}`
+                      : "Location unavailable"}
+                  </span>
 
-                    <p>
-                      {incident.description}
-                    </p>
+                  <span>
+                    🤖 AI {incident.confidence}%
+                  </span>
 
-                    <div className="admin-meta">
-
-                      <span>
-                        📍{" "}
-                        {incident.latitude
-                          ? `${Number(
-                              incident.latitude
-                            ).toFixed(5)}, ${Number(
-                              incident.longitude
-                            ).toFixed(5)}`
-                          : "Location unavailable"}
-                      </span>
-
-                      <span>
-                        🤖 AI {incident.confidence}%
-                      </span>
-
-                      <span>
-                        🕐{" "}
-                        {new Date(
-                          incident.createdAt
-                        ).toLocaleTimeString()}
-                      </span>
-
-                    </div>
-
-                  </div>
+                  <span>
+                    🕐{" "}
+                    {new Date(
+                      incident.createdAt
+                    ).toLocaleTimeString()}
+                  </span>
 
                 </div>
 
-                <div className="admin-response">
+                <div className="admin-incident-meta">
 
-                  <div>
+                  <span>
+                    🚑 Required:{" "}
+                    {incident.requiredResponders?.join(
+                      ", "
+                    )}
+                  </span>
 
-                    <small>
-                      REQUIRED RESPONSE
-                    </small>
-
-                    <div className="admin-tags">
-
-                      {incident.requiredResponders?.map(
-                        (item) => (
-                          <span key={item}>
-                            🚑 {item}
-                          </span>
-                        )
-                      )}
-
-                    </div>
-
-                  </div>
-
-                  <div className="assignment">
-
-                    <small>
-                      ASSIGNED UNIT
-                    </small>
-
-                    <strong>
-                      {incident.assignedResponder ||
-                        "SEARCHING..."}
-                    </strong>
-
-                  </div>
-
-                </div>
-
-                <div className="admin-progress">
-
-                  <div className="progress-label">
-                    <span>RESPONSE STATUS</span>
-
-                    <strong>
-                      {incident.status}
-                    </strong>
-                  </div>
-
-                  <div className="progress-track">
-
-                    <div
-                      className={`progress-fill ${
-                        incident.status === "RESOLVED"
-                          ? "resolved"
-                          : incident.status === "EN ROUTE"
-                          ? "enroute"
-                          : "searching"
-                      }`}
-                      style={{
-                        width:
-                          incident.status === "RESOLVED"
-                            ? "100%"
-                            : incident.status === "EN ROUTE"
-                            ? "75%"
-                            : incident.status === "ACCEPTED"
-                            ? "45%"
-                            : "20%",
-                      }}
-                    ></div>
-
-                  </div>
-
-                  <div className="progress-steps">
-
-                    <span className="active-step">
-                      REPORTED
-                    </span>
-
-                    <span>
-                      MATCHED
-                    </span>
-
-                    <span>
-                      EN ROUTE
-                    </span>
-
-                    <span>
-                      RESOLVED
-                    </span>
-
-                  </div>
+                  <span>
+                    👮 Assigned:{" "}
+                    {incident.assignedResponder ||
+                      "SEARCHING..."}
+                  </span>
 
                 </div>
 
@@ -375,86 +547,91 @@ function Admin() {
             ))}
 
           </section>
-
         )}
 
-        <section className="responder-network">
+        {/* ================================
+            RESPONDER NETWORK
+        ================================= */}
 
-          <div className="admin-section-header">
+        <section className="admin-title-row">
 
-            <div>
-              <small>RESPONSE NETWORK</small>
+          <div>
+            <small>
+              RESPONSE NETWORK
+            </small>
 
-              <h2>
-                Responder Units
-              </h2>
-            </div>
-
-            <div className="refresh-status">
-              {responders.length} UNITS CONNECTED
-            </div>
-
+            <h1>
+              Responder Units
+            </h1>
           </div>
 
-          <div className="responder-grid">
+          <div className="admin-refresh">
+            {responders.length} UNITS CONNECTED
+          </div>
 
-            {responders.map((responder) => (
+        </section>
 
-              <div
-                className="network-card"
-                key={responder.id}
-              >
+        <section className="admin-responder-list">
 
-                <div className="network-icon">
-                  {responder.type === "POLICE"
-                    ? "🚔"
-                    : responder.type === "MEDICAL"
-                    ? "🏥"
-                    : "🚑"}
-                </div>
+          {responders.map((responder) => (
 
-                <div className="network-info">
+            <div
+              className="admin-responder"
+              key={responder.id}
+            >
 
-                  <h3>
-                    {responder.name}
-                  </h3>
+              <div className="admin-responder-icon">
 
-                  <p>
-                    {responder.id}
-                  </p>
-
-                  <span
-                    className={`unit-status ${
-                      responder.status === "AVAILABLE"
-                        ? "unit-available"
-                        : "unit-busy"
-                    }`}
-                  >
-                    ● {responder.status}
-                  </span>
-
-                </div>
-
-                <div className="unit-distance">
-                  <small>DISTANCE</small>
-                  <strong>
-                    {responder.distance} km
-                  </strong>
-                </div>
+                {responder.type === "POLICE"
+                  ? "🚔"
+                  : responder.type === "MEDICAL"
+                  ? "🏥"
+                  : "🚑"}
 
               </div>
 
-            ))}
+              <div className="admin-responder-info">
 
-          </div>
+                <strong>
+                  {responder.name}
+                </strong>
+
+                <small>
+                  {responder.id} • {responder.type}
+                </small>
+
+              </div>
+
+              <div className="admin-responder-status">
+
+                <strong
+                  className={
+                    responder.status === "AVAILABLE"
+                      ? "status-available"
+                      : responder.status === "BUSY"
+                      ? "status-busy"
+                      : "status-offline"
+                  }
+                >
+                  ● {responder.status}
+                </strong>
+
+                <small>
+                  {responder.distance} km
+                </small>
+
+              </div>
+
+            </div>
+
+          ))}
 
         </section>
 
       </main>
 
       <footer className="admin-footer">
-        RESQ-X • AI-POWERED HYPERLOCAL
-        EMERGENCY RESPONSE
+        RESQ-X • AI-POWERED HYPERLOCAL EMERGENCY RESPONSE
       </footer>
 
     </div>

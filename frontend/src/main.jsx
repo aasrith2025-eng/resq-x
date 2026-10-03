@@ -4,7 +4,7 @@ import App from "./App";
 import Responder from "./Responder";
 import Admin from "./Admin";
 
-const path = window.location.pathname;
+const path = window.location.pathname.replace(/\/+$/, "") || "/";
 
 ReactDOM.createRoot(
   document.getElementById("root")
